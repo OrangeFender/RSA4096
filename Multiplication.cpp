@@ -4,7 +4,7 @@
 #include <iostream>
 
 
-int hexCharToInt(char c) {
+uint64_t hexCharToInt(char c) {
     if (c >= '0' && c <= '9') {
         return c - '0';
     } else if (c >= 'a' && c <= 'f') {
@@ -24,6 +24,7 @@ class uInt2048{
     uInt2048(const std::string& Str);
     uInt2048 uInt2048byHEX(const std::string& Str);
     uInt2048 operator*(const uInt2048& other) const;
+    void printHEX();
 };
 uInt2048::uInt2048(){
     for(int i = 0; i < MAXqwords;i++){
@@ -43,10 +44,12 @@ uInt2048::uInt2048(const std::string& Str){
             digits[index] =tmp;
             j=0;
             index++;
+            tmp=0;
         }
-        tmp+=hexCharToInt(Str[i])<<(j*4);
+        tmp|=hexCharToInt(Str[i])<<(j*4);
         j++;
     }
+    digits[index] =tmp;
 }
 
 int add_qword(const uint64_t* a,const uint64_t* b,uint64_t* res, int len){
@@ -77,7 +80,6 @@ uInt2048 uInt2048::operator-(const uInt2048& other) const{
     sub_qword(other.digits,digits,ret.digits,MAXqwords);
     return ret;
 }
-
 
 
 //乘法最小输入为dword结果正好为一个qword，这样可以保证没有溢出
@@ -146,7 +148,23 @@ else{
     delete[] AD_BC;
     }
 }
+
 uInt2048 uInt2048::operator*(const uInt2048& other) const{
     uInt2048 ret;
     uint64_t tmp[2*MAXqwords];
+    karatuba((const uint32_t *)digits,(const uint32_t *)other.digits,(uint32_t *)tmp,MAXqwords);
+    memcpy(tmp,digits,MAXqwords*sizeof(uint64_t));
+    return ret;
 }
+
+void uInt2048::printHEX(){
+    int i=MAXqwords-1;
+
+    while(i>=0){
+        std::cout<<std::hex<<digits[i];
+        i--;
+    }
+    std::cout<<std::endl;
+    return;
+}
+
