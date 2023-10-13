@@ -1,4 +1,4 @@
-#define MAXqwords 2048/sizeof(uint64_t)
+#define MAXqwords 2048/(sizeof(uint64_t)*8)
 #define dwordmask 0x00000000ffffffff
 
 #include <iostream>
@@ -85,7 +85,7 @@ uInt2048 uInt2048::operator-(const uInt2048& other) const{
 //乘法最小输入为dword结果正好为一个qword，这样可以保证没有溢出
 //该函数的作用是将a与b相乘（长度不定）并将结果加或减到结果数中
 //a,b长度相等
-void karatuba(const uint32_t *a,const uint32_t *b,uint32_t* result,int len){
+void karatsuba(const uint32_t *a,const uint32_t *b,uint32_t* result,int len){
 if(len==1){
     ((uint64_t*)result)[0]=((uint64_t)a[0]&dwordmask)*((uint64_t)b[0]&dwordmask);
     return;
@@ -98,13 +98,13 @@ if(len==2){
     int A_Bcarry=__builtin_uadd_overflow(a[0],a[halflen],A_B);
     int C_Dcarry=__builtin_uadd_overflow(b[0],b[halflen],C_D);
     uint32_t* AD_BC=new uint32_t[len];
-    karatuba(A_B,C_D,AD_BC,halflen);
+    karatsuba(A_B,C_D,AD_BC,halflen);
     int anotherCarry=0;
     if(A_Bcarry)anotherCarry+=__builtin_uadd_overflow(C_D[0],(AD_BC[halflen]),(AD_BC+halflen));
     if(C_Dcarry)anotherCarry+=__builtin_uadd_overflow(A_B[0],(AD_BC[halflen]),(AD_BC+halflen));
     int allcarry=anotherCarry+A_Bcarry*C_Dcarry;
-    karatuba(a,b,result,halflen);
-    karatuba(a+halflen,b+halflen,result+len,halflen);
+    karatsuba(a,b,result,halflen);
+    karatsuba(a+halflen,b+halflen,result+len,halflen);//这里的两个乘法互不干扰，所以直接赋值给result
     allcarry-=sub_qword((uint64_t*)AD_BC,(uint64_t*)(result+len),(uint64_t*)AD_BC,halflen);
     allcarry-=sub_qword((uint64_t*)AD_BC,(uint64_t*)(result),(uint64_t*)AD_BC,halflen);
     allcarry+=add_qword((uint64_t*)AD_BC,(uint64_t*)(result+halflen),(uint64_t*)(result+halflen),halflen);
@@ -128,12 +128,12 @@ else{
     int A_Bcarry=add_qword((uint64_t*)a,(uint64_t*)(a+halflen),(uint64_t*)A_B,halflen/2);
     int C_Dcarry=add_qword((uint64_t*)b,(uint64_t*)(b+halflen),(uint64_t*)C_D,halflen/2);
     uint32_t* AD_BC=new uint32_t[len];
-    karatuba(A_B,C_D,AD_BC,halflen);
+    karatsuba(A_B,C_D,AD_BC,halflen);
     if(A_Bcarry)A_Bcarry+=add_qword((uint64_t*)C_D,(uint64_t*)(AD_BC+halflen),(uint64_t*)(AD_BC+halflen),halflen/2);
     if(C_Dcarry)C_Dcarry+=add_qword((uint64_t*)A_B,(uint64_t*)(AD_BC+halflen),(uint64_t*)(AD_BC+halflen),halflen/2);
     int allcarry=A_Bcarry+C_Dcarry;
-    karatuba(a,b,result,halflen);
-    karatuba(a+halflen,b+halflen,result+len,halflen);
+    karatsuba(a,b,result,halflen);
+    karatsuba(a+halflen,b+halflen,result+len,halflen);
     allcarry-=sub_qword((uint64_t*)AD_BC,(uint64_t*)(result+len),(uint64_t*)AD_BC,halflen);
     allcarry-=sub_qword((uint64_t*)AD_BC,(uint64_t*)(result),(uint64_t*)AD_BC,halflen);
     allcarry+=add_qword((uint64_t*)AD_BC,(uint64_t*)(result+halflen),(uint64_t*)(result+halflen),halflen);
@@ -152,8 +152,8 @@ else{
 uInt2048 uInt2048::operator*(const uInt2048& other) const{
     uInt2048 ret;
     uint64_t tmp[2*MAXqwords];
-    karatuba((const uint32_t *)digits,(const uint32_t *)other.digits,(uint32_t *)tmp,MAXqwords);
-    memcpy(tmp,digits,MAXqwords*sizeof(uint64_t));
+    karatsuba((const uint32_t *)digits,(const uint32_t *)other.digits,(uint32_t *)tmp,MAXqwords);
+    memcpy((void*)ret.digits,tmp,MAXqwords*sizeof(uint64_t));
     return ret;
 }
 
