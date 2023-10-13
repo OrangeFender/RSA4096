@@ -55,16 +55,18 @@ uInt2048::uInt2048(const std::string& Str){
 int add_qword(const uint64_t* a,const uint64_t* b,uint64_t* res, int len){
     int carry=0;   
     for(int i=0; i<len;i++){
-        carry=__builtin_uaddll_overflow(a[i],carry,&res[i]);
-        carry|=__builtin_uaddll_overflow(res[i],b[i],&res[i]);
+        uint64_t tmp;
+        carry=__builtin_uaddll_overflow(a[i],carry,&tmp);
+        carry|=__builtin_uaddll_overflow(tmp,b[i],&res[i]);
     }
     return carry;
 }
 int sub_qword(const uint64_t* a,const uint64_t* b,uint64_t* res, int len){
     int carry=0;   
     for(int i=0; i<len;i++){
-        carry=__builtin_usubll_overflow(a[i],carry,&res[i]);
-        carry|=__builtin_usubll_overflow(res[i],b[i],&res[i]);
+        uint64_t tmp;
+        carry=__builtin_usubll_overflow(a[i],carry,&tmp);
+        carry|=__builtin_usubll_overflow(tmp,b[i],&res[i]);
     }
     return carry;
 }
