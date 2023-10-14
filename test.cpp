@@ -10,10 +10,8 @@ int main(){
     uInt2048 c=a*b;
     c.printHEX();
     uInt2048 res("37eefcd17676f2b4188111951fb5aa3f25870e16ae49c0cca67f40d8806b435ead11de0cb020ec0ff1bda7882943d48c3130b41dc8e5432e90ff22e51aadb85dde10681998ca6eb05bb7c5503bb65e8e26ce997016daa97ccb8fbc27c78892689e23316528fbd3dcbdf645b197f62924b1cf1f5cfff866da73b241354c79e6292f5d028679a1b7372e353b476b67beca8bbaf11a235ecd657e93d92734fa103109edba7a80872b167fbf21efa4695dc6612ac7efee98b93f1565e65698cbde7f06d37f6fe72aa355762a01f880dd7156af4ffb1de10813cac2ed742f7edcf2123617c7122beb0f77b97c42a6b7071146d4fc74b64ad587704bd5c93ed9e90d28");
-
-    res=res-c;
-    res.printHEX();
-    //std::cout<<std::memcmp(&res,&c,sizeof(uInt2048))<<std::endl;
+    
+    std::cout<<(res==c)<<std::endl;
     return 0;
 
 

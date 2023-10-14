@@ -25,6 +25,8 @@ class uInt2048{
     uInt2048 uInt2048byHEX(const std::string& Str);
     uInt2048 operator*(const uInt2048& other) const;
     void printHEX();
+    bool operator==(const uInt2048& other) const;
+    
 };
 uInt2048::uInt2048(){
     for(int i = 0; i < MAXqwords;i++){
@@ -178,6 +180,13 @@ uInt2048 uInt2048::operator*(const uInt2048& other) const{
 
     memcpy((void*)ret.digits,tmp,MAXqwords*sizeof(uint64_t));
     return ret;
+}
+
+bool uInt2048::operator==(const uInt2048& other) const{
+    for(int i=0;i<MAXqwords;i++){
+        if(digits[i]!=other.digits[i])return false;
+    }
+    return true;
 }
 
 void uInt2048::printHEX(){

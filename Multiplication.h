@@ -12,4 +12,5 @@ class uInt2048{
     uInt2048 uInt2048byHEX(const std::string& Str);
     uInt2048 operator*(const uInt2048& other) const;
     void printHEX();
+    bool operator==(const uInt2048& other) const;
 };
