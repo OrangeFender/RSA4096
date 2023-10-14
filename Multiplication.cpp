@@ -2,7 +2,7 @@
 #define dwordmask 0x00000000ffffffff
 
 #include <iostream>
-
+#include <iomanip>
 
 uint64_t hexCharToInt(char c) {
     if (c >= '0' && c <= '9') {
@@ -36,18 +36,22 @@ uInt2048::uInt2048(const std::string& Str){
         digits[i] =0;
     }
     int len = Str.length();
+    if(len>2048/4){
+        std::cout<<"error"<<std::endl;
+        return;
+    }
     uint64_t tmp=0;
     int j=0;
     int index=0;
     for(int i = len-1; i >=0;i--){
-        if(j==15){//算完一个数就将其放入数组中
+        tmp|=hexCharToInt(Str[i])<<(j*4);
+        j++;
+        if(j==16){//算完一个数就将其放入数组中
             digits[index] =tmp;
             j=0;
             index++;
             tmp=0;
         }
-        tmp|=hexCharToInt(Str[i])<<(j*4);
-        j++;
     }
     digits[index] =tmp;
 }
@@ -110,6 +114,9 @@ if(len==2){
     allcarry-=sub_qword((uint64_t*)AD_BC,(uint64_t*)(result+len),(uint64_t*)AD_BC,halflen);
     allcarry-=sub_qword((uint64_t*)AD_BC,(uint64_t*)(result),(uint64_t*)AD_BC,halflen);
     allcarry+=add_qword((uint64_t*)AD_BC,(uint64_t*)(result+halflen),(uint64_t*)(result+halflen),halflen);
+    if(allcarry>1){
+        std::cout<<"error"<<std::endl;
+    }
     int i=0;
     while (allcarry&&i<halflen)
     {
@@ -131,14 +138,18 @@ else{
     int C_Dcarry=add_qword((uint64_t*)b,(uint64_t*)(b+halflen),(uint64_t*)C_D,halflen/2);
     uint32_t* AD_BC=new uint32_t[len];
     karatsuba(A_B,C_D,AD_BC,halflen);
-    if(A_Bcarry)A_Bcarry+=add_qword((uint64_t*)C_D,(uint64_t*)(AD_BC+halflen),(uint64_t*)(AD_BC+halflen),halflen/2);
-    if(C_Dcarry)C_Dcarry+=add_qword((uint64_t*)A_B,(uint64_t*)(AD_BC+halflen),(uint64_t*)(AD_BC+halflen),halflen/2);
-    int allcarry=A_Bcarry+C_Dcarry;
+    int anotherCarry=0;
+    if(A_Bcarry)anotherCarry+=add_qword((uint64_t*)C_D,(uint64_t*)(AD_BC+halflen),(uint64_t*)(AD_BC+halflen),halflen/2);
+    if(C_Dcarry)anotherCarry+=add_qword((uint64_t*)A_B,(uint64_t*)(AD_BC+halflen),(uint64_t*)(AD_BC+halflen),halflen/2);
+    int allcarry=anotherCarry+A_Bcarry*C_Dcarry;
     karatsuba(a,b,result,halflen);
     karatsuba(a+halflen,b+halflen,result+len,halflen);
     allcarry-=sub_qword((uint64_t*)AD_BC,(uint64_t*)(result+len),(uint64_t*)AD_BC,halflen);
     allcarry-=sub_qword((uint64_t*)AD_BC,(uint64_t*)(result),(uint64_t*)AD_BC,halflen);
     allcarry+=add_qword((uint64_t*)AD_BC,(uint64_t*)(result+halflen),(uint64_t*)(result+halflen),halflen);
+    if(allcarry>1){
+        std::cout<<"error"<<std::endl;
+    }
     int i=0;
     while (allcarry&&i<halflen)
     {
@@ -154,7 +165,17 @@ else{
 uInt2048 uInt2048::operator*(const uInt2048& other) const{
     uInt2048 ret;
     uint64_t tmp[2*MAXqwords];
-    karatsuba((const uint32_t *)digits,(const uint32_t *)other.digits,(uint32_t *)tmp,MAXqwords);
+    karatsuba((const uint32_t *)digits,(const uint32_t *)other.digits,(uint32_t *)tmp,MAXqwords*2);
+
+    int i=2*MAXqwords-1;
+
+    std::cout<<"tmp:\n";
+    while(i>=0){
+        std::cout<<std::hex<<std::setw(16)<< std::setfill('0')<<tmp[i];
+        i--;
+    }
+    std::cout<<std::endl;
+
     memcpy((void*)ret.digits,tmp,MAXqwords*sizeof(uint64_t));
     return ret;
 }
@@ -163,7 +184,7 @@ void uInt2048::printHEX(){
     int i=MAXqwords-1;
 
     while(i>=0){
-        std::cout<<std::hex<<digits[i];
+        std::cout<<std::hex<<std::setw(16)<< std::setfill('0')<<digits[i];
         i--;
     }
     std::cout<<std::endl;
