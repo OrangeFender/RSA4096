@@ -7,16 +7,18 @@ class uInt2048;
 class uInt4096{
     uint64_t digits[MAXqwords4096];
     friend class uInt2048;
+    uInt4096(const uint64_t*Digit);
     public:
     uInt4096 operator+(const uInt4096& other) const;
     uInt4096 operator-(const uInt4096& other) const;
     uInt4096();
-    uInt4096(const uint64_t*Digit);
+    
     uInt4096(const std::string& Str);
     uInt2048 rightshift2048();
     uInt4096 operator>>(int n) const;
     uInt4096 operator*(const uInt4096& other) const;
-    
+    uInt2048 operator%(const uInt2048& other) const;
+    uInt4096 operator/(const uInt4096& other) const;
     bool operator==(const uInt4096& other) const;
     bool operator>=(const uInt4096& other) const;
     
@@ -40,6 +42,7 @@ class uInt2048{
     uInt2048 operator>>(int n) const;
     bool operator>= (const uInt2048& other) const;
     uInt4096 leftshift2048();
+    uInt4096 convert4096()const;
     uInt2048 operator/(const uInt2048& other) const;
 };
 

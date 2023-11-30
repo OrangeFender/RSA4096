@@ -154,6 +154,12 @@ uInt2048 uInt4096::convert2048(){//将4096位转化为2048位
     return ret;
 }
 
+uInt4096 uInt2048::convert4096()const{//将2048位转化为4096位
+    uInt4096 ret;
+    memcpy((void*)ret.digits,(void*)digits,MAXqwords2048*sizeof(uint64_t));
+    return ret;
+}
+
 uInt2048 uInt4096::rightshift2048(){//4096位右移2048位
     uInt2048 ret(digits+MAXqwords2048);
     return ret;
@@ -245,7 +251,7 @@ uInt4096 uInt2048::leftshift2048(){//2048位左移2048位
     return ret;
 }
 
-int find_highestbit(uint64_t * digits){
+int find_highestbit_2048(uint64_t * digits){
     int k=0;
     for(int i=MAXqwords2048-1;i>=0;i--){
         for(int j=63;j>=0;j--){
@@ -258,10 +264,23 @@ int find_highestbit(uint64_t * digits){
     return k;
 }
 
+int find_highestbit_4096(uint64_t * digits){
+    int k=0;
+    for(int i=MAXqwords4096-1;i>=0;i--){
+        for(int j=63;j>=0;j--){
+            if(((digits[i]>>j)&1)){
+                k=i*64+j;
+                return k;
+            }
+        }
+    }
+    return k;
+}
+
 uInt2048 uInt2048::operator/(const uInt2048& other) const{//2048位除2048位
     uInt2048 ret;
-    int k=find_highestbit((uint64_t*)other.digits);
-    int l=find_highestbit((uint64_t*)digits);
+    int k=find_highestbit_2048((uint64_t*)other.digits);
+    int l=find_highestbit_2048((uint64_t*)digits);
     if(l<k){
         return ret;
     }
@@ -285,11 +304,40 @@ uInt2048 uInt2048::operator/(const uInt2048& other) const{//2048位除2048位
     return ret;
 }
 
+uInt4096 uInt4096::operator/(const uInt4096& other)const{//4096位除4096位
+    uInt4096 ret;
+    int k=find_highestbit_4096((uint64_t*)other.digits);
+    int l=find_highestbit_4096((uint64_t*)digits);
+    if(l<k){
+        return ret;
+    }
+    else{
+        int n=l-k;
+        int sbits=n%64;
+        int qwords=n/64;
+        while(qwords>=0){
+            while (sbits>=0){
+                ret.digits[qwords]^=((uint64_t)1<<sbits);//先将这一位设为1
+                uInt4096 tmp=(ret*other);
+                if(tmp>=*this){
+                    ret.digits[qwords]^=((uint64_t)1<<sbits);//如果大于就将这一位设为0
+                }
+                sbits--;
+            }
+            qwords--;
+            sbits=63;
+        }
+    }
+    return ret;
+}
+
+
+
 uInt2048 uInt2048::operator%(const uInt2048& other) const{//2048位模2048位
 //固定k为2048
 uInt2048 m;
 //利用二进制除法计算m，m=2^2048/q
-int k=find_highestbit((uint64_t*)other.digits);
+int k=find_highestbit_2048((uint64_t*)other.digits);
 int l=2049;
 
 int n=l-k;
@@ -320,4 +368,11 @@ if(tmp>=other){
     }
 return tmp;
 
+}
+
+uInt2048 uInt4096::operator%(const uInt2048& other) const{//4096位模2048位
+    uInt4096 other4096=other.convert4096();
+    uInt4096 quotient=*this/(other4096);
+    uInt4096 ret=*this-quotient*other4096;
+    return ret.convert2048();
 }
