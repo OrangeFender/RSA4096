@@ -22,19 +22,28 @@ uInt2048 REDC(uInt4096 T,uInt2048 N,uInt2048 N_){
     }
 }
 
-uInt2048 XGCD(uInt2048 a,uInt2048 b,uInt2048& x,uInt2048& y){
+uInt2048 XGCD(uInt2048 *a,uInt2048 *b,uInt2048& x,uInt2048& y){
     const static uInt2048 zero;
-    if(b==zero){
+    if(*b==zero){
         x=uInt2048("1");
         y=uInt2048("0");
-        return a;
+        return *a;
     }
     else{
-    uInt2048 gcd = XGCD(b, a%b, x, y);
-    uInt2048 t = x;
+    uInt2048 *remainder =new uInt2048;
+    *remainder=*a%*b;
+    uInt2048 gcd = XGCD(b, remainder, x, y);
+    uInt2048* t =new uInt2048;
+    *t=x;
     x = y;
-    y = t - ((a/b) * y).convert2048();
+    y = *t - ((*a/(*b)) * y).convert2048();
+
+    delete remainder;
+    delete t;
+    
+    return gcd;
     }
+    
 }
 
 void MontgomeryInt::setN(uInt2048 n){
@@ -45,7 +54,7 @@ void MontgomeryInt::setN(uInt2048 n){
     uInt2048 x,y;
     uInt2048 q=(R/N.convert4096()).convert2048();
     uInt2048 RmodN=(R-q*N).convert2048();
-    XGCD(N,RmodN,x,y);
+    XGCD(&N,&RmodN,x,y);
     //x.printHEX();
     //y.printHEX();
     uInt2048 t=x;
@@ -53,8 +62,8 @@ void MontgomeryInt::setN(uInt2048 n){
     y=t-(q*y).convert2048();
     N_=zero-y;
 
-    N.printHEX();
-    N_.printHEX();
+    //N.printHEX();
+    //N_.printHEX();
 }
 
 void MontgomeryInt::setNandN_(uInt2048 n,uInt2048 n_){

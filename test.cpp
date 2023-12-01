@@ -34,7 +34,8 @@ int main(){
     std::cout<<"Barrett reduction verification: "<<((b%e)==res2)<<std::endl;
     //-------测试蒙哥马利乘法------------
 
-    MontgomeryInt::setNandN_(e,e_);
+    //MontgomeryInt::setNandN_(e,e_);
+    MontgomeryInt::setN(e);
     MontgomeryInt A(a);
     //A.convert().printHEX();
     MontgomeryInt B(b);

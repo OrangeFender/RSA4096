@@ -31,11 +31,11 @@ if(len==1){
 if(len==2){
         int halflen =len/2;
     int resultlen=2*len;
-    uint32_t* A_B=new uint32_t[halflen];
-    uint32_t* C_D=new uint32_t[halflen];
+    uint32_t A_B[halflen];
+    uint32_t C_D[halflen];
     int A_Bcarry=__builtin_uadd_overflow(a[0],a[halflen],A_B);
     int C_Dcarry=__builtin_uadd_overflow(b[0],b[halflen],C_D);
-    uint32_t* AD_BC=new uint32_t[len];
+    uint32_t AD_BC[len];
     karatsuba(A_B,C_D,AD_BC,halflen);
     int anotherCarry=0;
     if(A_Bcarry)anotherCarry+=__builtin_uadd_overflow(C_D[0],(AD_BC[halflen]),(AD_BC+halflen));
@@ -53,20 +53,20 @@ if(len==2){
         allcarry=__builtin_uadd_overflow(allcarry,result[halflen+len+i],result+halflen+len+i);
         i++;
     }
-    delete[] A_B;
-    delete[] C_D;
-    delete[] AD_BC;
+    //delete[] A_B;
+    //delete[] C_D;
+    //delete[] AD_BC;
     }
 
 else{
 
     int halflen =len/2;
     int resultlen=2*len;
-    uint32_t* A_B=new uint32_t[halflen];
-    uint32_t* C_D=new uint32_t[halflen];
+    uint32_t A_B[halflen];
+    uint32_t C_D[halflen];
     int A_Bcarry=add_qword((uint64_t*)a,(uint64_t*)(a+halflen),(uint64_t*)A_B,halflen/2);
     int C_Dcarry=add_qword((uint64_t*)b,(uint64_t*)(b+halflen),(uint64_t*)C_D,halflen/2);
-    uint32_t* AD_BC=new uint32_t[len];
+    uint32_t AD_BC[len];
     karatsuba(A_B,C_D,AD_BC,halflen);
     int anotherCarry=0;
     if(A_Bcarry)anotherCarry+=add_qword((uint64_t*)C_D,(uint64_t*)(AD_BC+halflen),(uint64_t*)(AD_BC+halflen),halflen/2);
@@ -84,8 +84,8 @@ else{
         allcarry=__builtin_uadd_overflow(allcarry,result[halflen+len+i],result+halflen+len+i);
         i++;
     }
-    delete[] A_B;
-    delete[] C_D;
-    delete[] AD_BC;
+    //delete[] A_B;
+    //delete[] C_D;
+    //delete[] AD_BC;
     }
 }
