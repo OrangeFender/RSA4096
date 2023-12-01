@@ -23,6 +23,19 @@ int static sub_qword(const uint64_t* a,const uint64_t* b,uint64_t* res, int len)
 //乘法最小输入为dword结果正好为一个qword，这样可以保证没有溢出
 //该函数的作用是将a与b相乘（长度不定）并将结果加或减到结果数中
 //a,b长度相等
+/*
+        Karatsuba算法图示:
+            A  B
+         ×  C  D
+        -----------------
+            AD BD
+        +AC BC
+        AD+BC = (A+B)(C+D)-AC-BD
+        AC, BD 不会产生溢出，但是AD+BC可能会产生溢出，所以需要特殊处理。
+        而实际处理更为复杂，因为计算AD+BC需要先计算A+B，C+D，此时就会发生溢出。
+        先用A_Bcarry和C_Dcarry记录A+B和C+D是否发生了溢出，如果发生了溢出，那么计算(A+B)(C+D)时要加上溢出的部分，注意溢出最多为1，因此只需要加一次A+B或C+D即可。
+        allcarry用于最终记录AD+BC的溢出情况，注意这里的溢出部分可能会导致传递，因此需要循环处理。
+    */
 void karatsuba(const uint32_t *a,const uint32_t *b,uint32_t* result,int len){
 if(len==1){
     ((uint64_t*)result)[0]=((uint64_t)a[0]&dwordmask)*((uint64_t)b[0]&dwordmask);
