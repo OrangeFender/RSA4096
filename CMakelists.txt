@@ -1,4 +1,24 @@
 cmake_minimum_required(VERSION 3.0)
 project(test)
-aux_source_directory(. DIR_SRCS)
-add_executable(test ${DIR_SRCS})
+
+set(SOURCES
+    BigInt.cpp
+    Karatsuba.cpp
+    Montgomery.cpp
+    test.cpp
+)
+
+set(HEADERS
+    BigInt.h
+    Karatsuba.h
+    Montgomery.h
+)
+
+add_executable(test ${SOURCES})
+
+# 设置编译器选项
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(test PRIVATE -O3)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(test PRIVATE /O2)
+endif()
