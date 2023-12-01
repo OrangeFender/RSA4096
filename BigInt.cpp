@@ -8,6 +8,8 @@
 
 #include "BigInt.h"
 
+static uInt2048 zero2048=uInt2048("0");
+
 uint64_t hexCharToInt(char c) {
     if (c >= '0' && c <= '9') {
         return c - '0';
@@ -247,7 +249,7 @@ void uInt4096::printHEX()const{
 
 uInt4096 uInt2048::leftshift2048(){//2048位左移2048位
     uInt4096 ret;
-    memcpy((void*)ret.digits,(void*)digits,MAXqwords2048*sizeof(uint64_t));
+    memcpy((void*)(ret.digits+MAXqwords2048),(void*)digits,MAXqwords2048*sizeof(uint64_t));
     return ret;
 }
 
@@ -336,8 +338,13 @@ uInt4096 uInt4096::operator/(const uInt4096& other)const{//4096位除4096位
 uInt2048 uInt2048::operator%(const uInt2048& other) const{//2048位模2048位
 //固定k为2048
 uInt2048 m;
+if(other==zero2048){
+    return zero2048;
+}
+
 //利用二进制除法计算m，m=2^2048/q
 int k=find_highestbit_2048((uint64_t*)other.digits);
+
 int l=2049;
 
 int n=l-k;
@@ -374,5 +381,6 @@ uInt2048 uInt4096::operator%(const uInt2048& other) const{//4096位模2048位
     uInt4096 other4096=other.convert4096();
     uInt4096 quotient=*this/(other4096);
     uInt4096 ret=*this-quotient*other4096;
+
     return ret.convert2048();
 }

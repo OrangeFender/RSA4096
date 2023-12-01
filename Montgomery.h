@@ -5,6 +5,13 @@
 class MontgomeryInt{
     uInt2048 state;
     public:
-    MontgomeryInt(uInt2048 a,uInt2048 N,uInt2048 N_);
-    
+    static uInt2048 N;//模数使用静态变量
+    static uInt2048 N_;
+    MontgomeryInt(uInt2048 a);
+    MontgomeryInt();
+    MontgomeryInt operator*(const MontgomeryInt& other) const;
+    MontgomeryInt operator+(const MontgomeryInt& other) const;
+    uInt2048 convert()const;
+    static void setN(uInt2048 N);
+    static void setNandN_(uInt2048 n,uInt2048 n_);
 };
